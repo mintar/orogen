@@ -9,10 +9,22 @@ module OroGen
 	    attr_reader :templates
 	end
 
-        # Returns the directory where Orogen's lib part sits (i.e. where
-        # autobuild.rb and autobuild/ are)
+        # Returns the directory where oroGen's lib part sits, i.e.
+        # base_dir is defined by the directory where orogen.rb resides
         def self.base_dir
-	    File.expand_path(File.join('..', '..'), File.dirname(__FILE__))
+            search_path = File.dirname(__FILE__)
+            while true
+                search_path = File.expand_path("..",search_path)
+                if Pathname.new(search_path).root?
+                    break
+                end
+                Find.find(search_path) do |file|
+                    if File.basename(file) =~ /^orogen.rb$/
+                        return search_path
+                    end
+                end
+            end
+            raise RuntimeError, "Orogen::Gen::RTT_CPP failed to identify base directory of orogen"
         end
 
 	# call-seq:
